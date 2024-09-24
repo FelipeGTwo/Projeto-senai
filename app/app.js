@@ -2,6 +2,7 @@ const express = require("express")
 const app = express()
 const port = 8080
 const path = require('path');
+const db = require('../database')
 
 
 app.get('/api-tester', (req, res) => {
@@ -23,4 +24,20 @@ app.post('/rota', (req, res) => {
 
 app.listen(port, () => {
     console.log(`Rodando ${port}`)
+})
+
+//app.get('/usuario/:id', (req, res, next) => {
+ //   db.all()
+  //  res.send(req.params.id)
+ // })
+
+  app.get('/usuario/:id', (req, res) => {
+	parametro = req.params.id
+  db.get("SELECT * FROM user WHERE id = ?", parametro, (error, row) => {
+  	if(error) {
+    	res.json(error)
+      return
+    }
+    res.send(row)
+  })
 })
