@@ -1,59 +1,139 @@
+require("dotenv").config()
+const db = require('../database.js');
+const { table } = require("console");
 const express = require("express")
 const app = express()
 const port = 8080
 const path = require('path');
-const db = require('../database')
 
 
- app.get('/api-tester', (req, res) => {
-     res.sendFile(path.join(__dirname, 'public/index.html'))
- })
-  
-// app.get('/', (req, res) => {
-//     res.send('Funcionou essa p****!')
-// })
-  
+app.use(express.json());
 
-app.use(express.json()); // Para permitir que o Express leia JSON no corpo das requisições
+app.get('/api-tester', (req,res) => {
+    res.sendFile(path.join(__dirname, 'public/index.html'));
+});
 
-app.post('/tasks', (req, res) => {
-    const dados = req.body
-    body = req.body.id
-    console.log(dados)
+app.get('/rota', (req,res) => {
+    console.log(process.env.DBHOST);
 })
 
+app.post('/rota', (req, res) => {
+    console.log('Dados recebidos no body:', req.body);
+    res.json({ message: 'Dados recebidos com sucesso!', body: req.body });
+})
 
 app.listen(port, () => {
-    console.log(`Rodando ${port}`)
+console.log(`Example app listening on port ${port}`)
 })
-
-app.get('/tasks', (req, res, next) => {
-   db.query("SELECT * FROM tasks", (error, row) => {
-   	if(error) {
+////30/09
+app.get('/tasks/:id', (req, res) => {
+	parametro1 = req.params.id
+  db.query("SELECT * FROM tasks WHERE id = ?", parametro1, (error, row) => {
+  	if(error) {
     	res.json(error)
+      return
     }
     res.send(row)
-   })
- })
+  })
+})
+app.get('/tasks', (req, res) => {
+  db.query("SELECT * FROM tasks ORDER BY id ASC", (error, rows) => {
+  	if(error) {
+    	console.log(error)
+      return
+    }
+    res.send(rows)
+  })
+})
+/////1/10
+app.post('/tasks', (req, res) => {
+  const parametros = req.body
+  console.log(parametros)
+  db.query(`INSERT INTO tasks (titulo, descricao, status) VALUES ('${parametros.titulo}', '${parametros.descricao}', '${parametros.status}')`, (error, row) => {
+  	if(error) {
+    	res.json(error)
+      return
+    }
+    res.send(row)
+  })
+});
 
-// app.post('/tasks', (req, res, next) => {
-//  db.query("SELECT * FROM user WHERE id = ?", (error, row) => {
-//    if(error) {
-//     res.json(error)
-//   }
-//   res.send(row)
-//  })
-// })
- 
+app.put('/tasks/:id', (req, res) => {
+  const parametro1 = req.body
+  console.log(parametro1)
+  db.query(`UPDATE tasks SET titulo = '${parametro1.titulo}', descricao = '${parametro1.descricao}', status = '${parametro1.status}' WHERE id = ?`, req.params.id,  (error, row) => {
+  	if(error) {
+    	res.json(error)
+      return
+    }
+    res.send(row)
+  })
+});
 
-//   app.get('tasks', (req, res) => {
-// 	parametro = req.params.id
-//   db.get("SELECT * FROM user WHERE id = ?", parametro, (error, row) => {
-//   	if(error) {
-//     	res.json(error)
-//       return
-//     }
-//     res.send(row)
-//   })
-// })
+app.delete('/tasks/:id', (req, res) =>{
+  const parametro2 = req.body
+  console.log(parametro2)
+  db.query(`DELETE FROM tasks WHERE id = ?`, req.params.id,  (error, row) => {
+  	if(error) {
+    	res.json(error)
+      return
+    }
+    res.send(row)
+  })
+})
+//////////// 14/10
+app.get('/users/:id', (req, res) => {
+	parametro1 = req.params.id
+  db.query("SELECT * FROM users WHERE id = ?", parametro1, (error, row) => {
+  	if(error) {
+    	res.json(error)
+      return
+    }
+    res.send(row)
+  })
+})
+app.get('/users', (req, res) => {
+  db.query("SELECT * FROM users ORDER BY id ASC", (error, rows) => {
+  	if(error) {
+    	console.log(error)
+      return
+    }
+    res.send(rows)
+  })
+})
 
+app.post('/users', (req, res) => {
+  const parametros = req.body
+  console.log(parametros)
+  db.query(`INSERT INTO users (nome) VALUES ('${parametros.titulo}')`, (error, row) => {
+  	if(error) {
+    	res.json(error)
+      return
+    }
+    res.send(row)
+  })
+});
+
+app.put('/users/:id', (req, res) => {
+  const parametro1 = req.body
+  console.log(parametro1)
+  db.query(`UPDATE users SET nome = '${parametro1.titulo}'' WHERE id = ?`, req.params.id,  (error, row) => {
+  	if(error) {
+    	res.json(error)
+      return
+    }
+    res.send(row)
+  })
+});
+
+app.delete('/users/:id', (req, res) =>{
+  const parametro1 = req.body
+  console.log(parametro1)
+  db.query(`DELETE FROM users WHERE id = ?`, req.params.id,  (error, row) => {
+  	if(error) {
+    	res.json(error)
+      return
+    }
+    res.send(row)
+  })
+})
